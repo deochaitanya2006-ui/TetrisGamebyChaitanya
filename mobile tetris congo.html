@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Modern Tetris Mobile</title>
+
+<style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:radial-gradient(circle at top,#5769b5,#2798a2,#264aab);
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  font-family:Segoe UI,sans-serif;
+  color:#fff;
+  overflow:hidden;
+}
+
+.navbar{
+  width:100%;
+  padding:8px 10px;
+  background:rgba(0,0,0,.45);
+  backdrop-filter:blur(8px);
+  text-align:center;
+}
+
+.logo{
+  font-size:16px;
+  font-weight:700;
+  background:linear-gradient(45deg,#00c6ff,#00ffcc);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
+.dev{
+  font-size:10px;
+  opacity:.8;
+  margin-top:2px;
+}
+
+.wrap{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:8px;
+  gap:10px;
+}
+
+canvas{
+  background:#0b0b0b;
+  border-radius:12px;
+  box-shadow:0 0 15px rgba(0,0,0,.8);
+  width:72vw;
+  max-width:240px;
+}
+
+.panel{
+  width:90vw;
+  max-width:260px;
+  background:rgba(0,0,0,.55);
+  backdrop-filter:blur(8px);
+  border-radius:12px;
+  padding:10px;
+}
+
+.stats{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:10px;
+}
+
+.stat{
+  flex:1;
+  text-align:center;
+}
+
+.title{
+  font-size:11px;
+}
+
+.score{
+  font-size:16px;
+  color:#00e6ff;
+}
+
+.btns{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+}
+
+button{
+  padding:7px;
+  border:none;
+  border-radius:8px;
+  background:linear-gradient(45deg,#00c6ff,#0072ff);
+  color:#fff;
+  font-size:11px;
+}
+
+.controls{
+  margin-top:12px;
+  display:flex;
+  justify-content:center;
+  gap:10px;
+}
+
+.controls button{
+  width:48px;
+  height:48px;
+  border-radius:50%;
+}
+
+/* INSTRUCTIONS */
+
+.instructions{
+  width:92vw;
+  max-width:280px;
+  margin-top:10px;
+  padding:10px;
+  background:rgba(0,0,0,.45);
+  border-radius:12px;
+  text-align:center;
+  font-size:11px;
+  max-height:120px;
+  overflow-y:auto;
+}
+
+.instructions h3{
+  color:#00e6ff;
+}
+/* INSTRUCTIONS */
+
+.instructions{
+
+  width:92vw;
+  max-width:280px;
+
+  margin-top:10px;
+  margin-bottom:15px;
+
+  padding:10px;
+
+  background:rgba(0,0,0,.45);
+
+  border-radius:12px;
+
+  text-align:center;
+
+  backdrop-filter:blur(8px);
+
+  font-size:11px;
+
+  line-height:1.6;
+
+  max-height:120px;
+
+  overflow-y:auto;
+
+  scrollbar-width:thin;
+}
+
+/* SCROLLBAR */
+
+.instructions::-webkit-scrollbar{
+
+  width:4px;
+}
+
+.instructions::-webkit-scrollbar-thumb{
+
+  background:#00c6ff;
+
+  border-radius:10px;
+}
+
+.instructions h3{
+
+  margin-bottom:6px;
+
+  color:#00e6ff;
+
+  font-size:13px;
+
+  position:sticky;
+
+  top:0;
+
+  background:rgba(0,0,0,.6);
+
+  padding:2px;
+}
+
+.instructions p{
+
+  margin:4px 0;
+}
+
+</style>
+</head>
+
+<body>
+
+<nav class="navbar">
+  <div class="logo">🎮 MOBILE MODERN TETRIS</div>
+  <div class="dev"><b>Developed by Chaitanya Deo</b></div>
+</nav>
+
+<div class="wrap">
+
+<canvas id="game" width="240" height="400"></canvas>
+
+<div class="panel">
+
+<div class="stats">
+  <div class="stat">
+    <div class="title">Score</div>
+    <div class="score" id="score">0</div>
+  </div>
+
+  <div class="stat">
+    <div class="title">Level</div>
+    <div class="score" id="level">1</div>
+  </div>
+
+  <div class="stat">
+    <div class="title">Lines</div>
+    <div class="score" id="lines">0</div>
+  </div>
+</div>
+
+<div class="btns">
+  <button onclick="changeLevel(1)">Level UP</button>
+  <button onclick="changeLevel(-1)">Level Down</button>
+  <button onclick="togglePause()">⏸️ Pause</button>
+  <button onclick="restart()">Restart</button>
+</div>
+
+<div class="controls">
+  <button onclick="move(-1)">⬅️</button>
+  <button onclick="rotateBtn()">🔄</button>
+  <button onclick="move(1)">➡️</button>
+  <button onclick="drop()">⬇️</button>
+</div>
+
+</div>
+
+<div class="instructions">
+<h3>🎮 How to Play</h3>
+<p>⬅️ Move Left | ➡️ Move Right</p>
+<p>🔄 Rotate Pieces</p>
+<p>⬇️ Drop Faster</p>
+<p>🏆 Clear lines to score</p>
+<p>⏸️ Pause anytime</p>
+</div>
+
+</div>
+
+<script>
+
+/* CANVAS */
+const cvs=document.getElementById('game');
+const ctx=cvs.getContext('2d');
+ctx.scale(20,20);
+
+/* UI */
+const scoreEl=document.getElementById('score');
+const levelEl=document.getElementById('level');
+const linesEl=document.getElementById('lines');
+
+/* COLORS */
+const colors=[null,'#ff4d4d','#4da6ff','#4dff88','#cc66ff','#ffaa00','#ff66cc','#66ffff'];
+
+/* MATRIX */
+function M(w,h){
+  return Array.from({length:h},()=>Array(w).fill(0));
+}
+
+/* PIECES */
+function P(t){
+  return t==='T'?[[0,1,0],[1,1,1],[0,0,0]]
+  :t==='O'?[[2,2],[2,2]]
+  :t==='L'?[[0,3,0],[0,3,0],[0,3,3]]
+  :t==='J'?[[0,4,0],[0,4,0],[4,4,0]]
+  :t==='I'?[[0,5,0,0],[0,5,0,0],[0,5,0,0],[0,5,0,0]]
+  :t==='S'?[[0,6,6],[6,6,0],[0,0,0]]
+  :[[7,7,0],[0,7,7],[0,0,0]];
+}
+
+const arena=M(12,20);
+
+const player={
+  pos:{x:0,y:0},
+  m:null,
+  score:0,
+  level:1,
+  lines:0
+};
+
+let queue=[];
+let isPaused=false;
+
+let celebration=false;
+let hasCelebrated200=false;
+
+/* CELEBRATION */
+function celebrate(){
+  celebration=true;
+  setTimeout(()=>celebration=false,3000);
+}
+
+/* UPDATE UI */
+function updateUI(){
+
+  scoreEl.textContent=player.score;
+  levelEl.textContent=player.level;
+  linesEl.textContent=player.lines;
+
+  if(player.score>=200 && !hasCelebrated200 && !isPaused){
+    hasCelebrated200=true;
+    celebrate();
+  }
+}
+
+/* REFILL */
+function refill(){
+  const s='ILJOTSZ';
+  while(queue.length<3){
+    queue.push(P(s[(Math.random()*s.length)|0]));
+  }
+}
+
+/* DRAW */
+function draw(){
+
+  ctx.fillStyle="#000";
+  ctx.fillRect(0,0,cvs.width,cvs.height);
+
+  arena.forEach((r,y)=>{
+    r.forEach((v,x)=>{
+      if(v) drawBlock(x,y,colors[v]);
+    });
+  });
+
+  if(player.m){
+    player.m.forEach((r,y)=>{
+      r.forEach((v,x)=>{
+        if(v) drawBlock(x+player.pos.x,y+player.pos.y,colors[v]);
+      });
+    });
+  }
+
+  if(celebration){
+    ctx.fillStyle="rgba(0,0,0,0.3)";
+    ctx.fillRect(0,0,12,20);
+
+    ctx.fillStyle="#fff";
+    ctx.fillText("🎉 CONGRATULATIONS!",1,10);
+  }
+}
+
+function drawBlock(x,y,c){
+  ctx.fillStyle=c;
+  ctx.fillRect(x,y,1,1);
+}
+
+/* COLLISION */
+function collide(m,o){
+  for(let y=0;y<m.length;y++){
+    for(let x=0;x<m[y].length;x++){
+      if(m[y][x] &&
+        (arena[y+o.y] && arena[y+o.y][x+o.x])!==0){
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+/* ROTATE */
+function rotate(matrix){
+
+  for(let y=0;y<matrix.length;y++){
+    for(let x=0;x<y;x++){
+      [
+        matrix[x][y],
+        matrix[y][x]
+      ]=[
+        matrix[y][x],
+        matrix[x][y]
+      ];
+    }
+  }
+
+  matrix.forEach(r=>r.reverse());
+}
+
+/* ROTATE BUTTON (FIXED) */
+function rotateBtn(){
+
+  const pos=player.pos.x;
+  let offset=1;
+
+  rotate(player.m);
+
+  while(collide(player.m,player.pos)){
+
+    player.pos.x+=offset;
+    offset=-(offset+(offset>0?1:-1));
+
+    if(offset>player.m[0].length){
+      rotate(player.m);
+      rotate(player.m);
+      rotate(player.m);
+      player.pos.x=pos;
+      return;
+    }
+  }
+}
+
+/* GAME LOGIC */
+function merge(){
+  player.m.forEach((r,y)=>{
+    r.forEach((v,x)=>{
+      if(v) arena[y+player.pos.y][x+player.pos.x]=v;
+    });
+  });
+}
+
+function sweep(){
+  let lines=0;
+
+  outer:
+  for(let y=arena.length-1;y>=0;y--){
+    for(let x=0;x<arena[y].length;x++){
+      if(!arena[y][x]) continue outer;
+    }
+    arena.splice(y,1);
+    arena.unshift(Array(12).fill(0));
+    y--;
+    lines++;
+  }
+
+  if(lines){
+    player.lines+=lines;
+    player.score+=lines*100*player.level;
+    player.level=Math.floor(player.lines/10)+1;
+    updateUI();
+  }
+}
+
+function spawn(){
+  refill();
+  player.m=queue.shift();
+  player.pos={x:5,y:0};
+  if(collide(player.m,player.pos)) restart();
+}
+
+function move(dir){
+  player.pos.x+=dir;
+  if(collide(player.m,player.pos)) player.pos.x-=dir;
+}
+
+function drop(){
+  player.pos.y++;
+  if(collide(player.m,player.pos)){
+    player.pos.y--;
+    merge();
+    sweep();
+    spawn();
+  }
+  dc=0;
+}
+
+/* CONTROL */
+function togglePause(){
+  isPaused=!isPaused;
+}
+
+function changeLevel(d){
+  player.level=Math.max(1,player.level+d);
+}
+
+/* RESTART FIX */
+function restart(){
+
+  arena.forEach(r=>r.fill(0));
+
+  player.score=0;
+  player.level=1;
+  player.lines=0;
+
+  queue=[];
+  celebration=false;
+  hasCelebrated200=false;
+
+  updateUI();
+  spawn();
+}
+
+/* LOOP */
+let last=0,dc=0,interval=650;
+
+function update(t=0){
+  let dt=t-last;
+  last=t;
+
+  if(!isPaused){
+    dc+=dt;
+    if(dc>interval) drop();
+  }
+
+  draw();
+  requestAnimationFrame(update);
+}
+
+spawn();
+update();
+
+</script>
+
+</body>
+</html>
